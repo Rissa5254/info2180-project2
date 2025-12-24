@@ -1,4 +1,5 @@
 <?php
+//Created by Shadelle Brown
 session_start();
 
 // Checks if user is already logged in
