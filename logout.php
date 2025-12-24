@@ -1,4 +1,5 @@
 <?php
+//Created by Shadelle Brown
 session_start();
 $_SESSION = array();
 if (isset($_COOKIE[session_name()])) {
