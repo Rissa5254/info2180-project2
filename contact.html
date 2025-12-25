@@ -89,7 +89,12 @@
             <div class="input-group">
                 <label for="assigned_to">Assigned To</label>
                 <select name="assigned_to" id="assigned_to" class="form-select">
-                    <option value="assigned_to"></option>
+                    <option value="">Assign To</option>
+                    <?php foreach ($users as users): ?>
+                        <option value="<?= $users['id'] ?>">
+                            <?= $users['first_name'] . " " . $users['last_name'] ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div><br />     
             
