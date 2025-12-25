@@ -7,6 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+//must be admin to view users - Selena Johnson
+if ($_SESSION['role'] !== 'Admin') {
+    http_response_code(403);
+    die('Forbidden: You do not have permission to access this page.');
+}
+
 require_once 'db.php';
 //Get Users
 try {
