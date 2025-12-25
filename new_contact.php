@@ -2,7 +2,7 @@
 <?php 
 //Created by Marissa O'Meallly
 session_start();
-require_once 'icludes/db.php';
+require_once 'db.php';
 
 $errors = [];
 $success = "";
