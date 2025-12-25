@@ -25,8 +25,8 @@ CREATE TABLE contacts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (assigned_to) REFERENCES Users(id),
-    FOREIGN KEY (created_by) REFERENCES Users(id)
+    FOREIGN KEY (assigned_to) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 CREATE TABLE notes (
@@ -36,8 +36,8 @@ CREATE TABLE notes (
     created_by INT, -- store the appropriate user id
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (contact_id) REFERENCES Contacts(id),
-    FOREIGN KEY (created_by) REFERENCES Users(id)
+    FOREIGN KEY (contact_id) REFERENCES contacts(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 INSERT INTO users (firstname, lastname, email, password, role)
