@@ -1,4 +1,4 @@
-<!--Create new contact.php-->
+<!--Create view_contact.php-->
 <?php 
 //Created by Marissa O'Meally
 session_start();
@@ -15,15 +15,15 @@ if (!$contact_id) {
 // Fetch contact details
 $sql = "
 SELECT c.*,
-       u1.first_name AS creator_fn, u1.last_name AS creator_ln,
-       u2.first_name AS assigned_fn, u2.last_name AS assigned_ln
+       u1.firstname AS creator_fn, u1.lastname AS creator_ln,
+       u2.firstname AS assigned_fn, u2.lastname AS assigned_ln
 FROM contacts c
 JOIN users u1 ON c.created_by = u1.id
 JOIN users u2 ON c.assigned_to = u2.id
 WHERE c.id = ?
 ";
 
-$stmt = $pdo->prepare($sql);
+$stmt = $conn->prepare($sql);
 $stmt->execute([$contact_id]);
 $contact = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -33,7 +33,7 @@ if (!$contact) {
 
 // Assign to me
 if (isset($_POST['assign_to_me'])) {
-    $stmt = $pdo->prepare(
+    $stmt = $conn->prepare(
         "UPDATE contacts
          SET assigned_to = ?, updated_at = NOW()
          WHERE id = ?"
@@ -46,11 +46,9 @@ if (isset($_POST['assign_to_me'])) {
 
 //Switch the contact type
 if (isset($_POST['switch_type'])) {
-    $newType = ($contact['type'] === 'Sales Lead')
-        ? 'Support'
-        : 'Sales Lead';
+    $newType = ($contact['type'] === 'sales_lead') ? 'support' : 'sales_lead';
 
-    $stmt = $pdo->prepare(
+    $stmt = $conn->prepare(
         "UPDATE contacts
          SET type = ?, updated_at = NOW()
          WHERE id = ?"
@@ -67,11 +65,11 @@ if (isset($_POST['add_note'])) {
 
     if ($comment) {
         // Prepend contact name automatically
-        $comment = "Note about " . $contact['first_name'] . ": " . $comment;
+        $comment = "Note about " . $contact['firstname'] . ": " . $comment;
 
-        $stmt = $pdo->prepare(
+        $stmt = $conn->prepare(
             "INSERT INTO notes
-             (contact_id, user_id, comment, created_at)
+             (contact_id, created_by, comment, created_at)
              VALUES (?, ?, ?, NOW())"
         );
         $stmt->execute([$contact_id, $user_id, $comment]);
@@ -82,11 +80,11 @@ if (isset($_POST['add_note'])) {
 }
 
 // Fetch notes about users
-$stmt = $pdo->prepare(
+$stmt = $conn->prepare(
     "SELECT n.comment, n.created_at,
-            u.first_name, u.last_name
+            u.firstname, u.lastname
      FROM notes n
-     JOIN users u ON n.user_id = u.id
+     JOIN users u ON n.created_by = u.id
      WHERE n.contact_id = ?
      ORDER BY n.created_at DESC"
 );
@@ -100,7 +98,7 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>New Contact - Dolphin CRM </title> 
+        <title>View Contact - Dolphin CRM </title> 
          <style>
             /* Add your own styles */
             * { 
@@ -257,7 +255,7 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <nav class="sidebar">
                 <a href="dashboard.php"><span class="sidebar-icon">🏠</span>Home</a>
                 <a href="new_contact.php"><span class="sidebar-icon">➕</span>New Contact</a>
-                <a href="users.php" class="active"><span class="sidebar-icon">👥</span>Users</a>
+                <a href="users.php"><span class="sidebar-icon">👥</span>Users</a>
                 <a href="logout.php"><span class="sidebar-icon">🚪</span>Logout</a>
             </nav>
 
@@ -266,8 +264,8 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div>
                     <h2>
                         <?= htmlspecialchars($contact['title']) ?>
-                        <?= htmlspecialchars($contact['first_name']) ?>
-                        <?= htmlspecialchars($contact['last_name']) ?>
+                        <?= htmlspecialchars($contact['firstname']) ?>
+                        <?= htmlspecialchars($contact['lastname']) ?>
                     </h2>
 
                     <p class="meta">
@@ -286,7 +284,7 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
                     <form method="POST">
                         <button type="submit" name="switch_type" class="btn yellow">
-                            🔁Switch to <?= ($contact['type'] === 'Sales Lead') ? 'Support' : 'Sales Lead' ?>   
+                            🔁Switch to <?= ($contact['type'] === 'sales_lead') ? 'Support' : 'Sales Lead' ?>   
                         </button>
                     </form>
                 </div>
@@ -325,7 +323,7 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <?php foreach ($notes as $note): ?>
                     <div class="note">
-                        <strong><?= $note['first_name'] . " " . $note['last_name'] ?></strong><br>
+                        <strong><?= $note['firstname'] . " " . $note['lastname'] ?></strong><br>
                         <?= $note['comment'] ?><br>
                         <small><?= $note['created_at'] ?></small>
                     </div>

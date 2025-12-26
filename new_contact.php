@@ -16,11 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     $title = clean($_POST['title'] ?? '');
     $first_name = clean($_POST['first_name'] ?? '');
     $last_name = clean($_POST['last_name'] ?? '');
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+    $email = clean($_POST['email'] ?? '');
     $telephone = clean($_POST['telephone'] ?? '');
     $company = clean($_POST['company'] ?? '');
     $type = clean($_POST['type'] ?? '');
-    $assigned_to = intval($_POST['assigned to']) ?? '';
+    $assigned_to = intval($_POST['assigned_to'] ?? 0);
     $created_by = $_SESSION['user_id'] ?? 1;   // logged-in user 
 
     // Validate input
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
 
     // Check if email already existed
-    $stmt = $pdo->prepare("SELECT COUNT(*)FROM users  WHERE email = :email"); 
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM contacts  WHERE email = :email"); 
     $stmt->execute(['email' => $email]);
     if ($stmt->fetchColumn() > 0){
         $errors[] = "Email already exists.";
@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     // Insert contacts into database
     if (empty($errors)){
-        $stmt = $pdo->prepare("
-        INSERT INTO contacts (title, first_name, last_name, email, telephone, company, type, assigned_to, created_by, created_at, updated_at)
+        $stmt = $conn->prepare("
+        INSERT INTO contacts (title, firstname, lastname, email, telephone, company, type, assigned_to, created_by, created_at, updated_at)
         VALUES (:title, :first_name, :last_name, :email, :telephone, :company, :type, :assigned_to, :created_by, :created_at, :updated_at)
         ");
 
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 }
 
 // Fetch users from drop-down
-$users = $pdo->query("SELECT id, first_name, last_name FROM users")->fetchAll();
+$users = $conn->query("SELECT id, firstname, lastname FROM users")->fetchAll();
 
 ?>
 
@@ -236,8 +236,8 @@ $users = $pdo->query("SELECT id, first_name, last_name FROM users")->fetchAll();
         <div class="container">
             <nav class="sidebar">
                 <a href="dashboard.php"><span class="sidebar-icon">🏠</span>Home</a>
-                <a href="new_contact.php"><span class="sidebar-icon">➕</span>New Contact</a>
-                <a href="users.php" class="active"><span class="sidebar-icon">👥</span>Users</a>
+                <a href="new_contact.php" class="active"><span class="sidebar-icon">➕</span>New Contact</a>
+                <a href="users.php"><span class="sidebar-icon">👥</span>Users</a>
                 <a href="logout.php"><span class="sidebar-icon">🚪</span>Logout</a>
             </nav>
 
@@ -326,8 +326,8 @@ $users = $pdo->query("SELECT id, first_name, last_name FROM users")->fetchAll();
                 <select name="assigned_to" id="assigned_to" class="form-select">
                     <option value="">Assign To</option>
                     <?php foreach ($users as $user): ?>
-                        <option value="<?= $users['id'] ?>">
-                            <?= $users['first_name'] . " " . $users['last_name'] ?>
+                        <option value="<?= $user['id'] ?>">
+                            <?= $user['firstname'] . " " . $user['lastname'] ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
