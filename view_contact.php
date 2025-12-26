@@ -66,6 +66,9 @@ if (isset($_POST['add_note'])) {
     $comment = htmlspecialchars(trim($_POST['comment'] ?? ''));
 
     if ($comment) {
+        // Prepend contact name automatically
+        $comment = "Note about " . $contact['first_name'] . ": " . $comment;
+
         $stmt = $pdo->prepare(
             "INSERT INTO notes
              (contact_id, user_id, comment, created_at)
@@ -198,7 +201,9 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             .grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
+                gap: 45px;
+                padding: 20px 15px;
+                margin-bottom: 15px;
             }
 
             .actions {
@@ -222,54 +227,73 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 background: #f1c40f;
             }
 
+            .add-note{
+                width: 10%;
+                background: #2b5ce6; 
+                color: white;
+                padding: 10px 18px; 
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                border: none; 
+                cursor: pointer;
+
+                display: flex;
+                justify-self: flex-end;
+            }
+
+            .add-note:hover{
+                background: #1e4bcc; 
+            }
+
          </style>
     </head>
     <body>
-            <header>
-                <div class="header-icon"></div>
-                <h1>🐬 Dolphin CRM </h1> 
-            </header>
+        <header>
+            <div class="header-icon"></div>
+            <h1>🐬 Dolphin CRM </h1> 
+        </header>
 
-            <div class="container">
-                <nav class="sidebar">
-                    <a href="dashboard.php"><span class="sidebar-icon">🏠</span>Home</a>
-                    <a href="new_contact.php"><span class="sidebar-icon">➕</span>New Contact</a>
-                    <a href="users.php" class="active"><span class="sidebar-icon">👥</span>Users</a>
-                    <a href="logout.php"><span class="sidebar-icon">🚪</span>Logout</a>
-                </nav>
+        <div class="container">
+            <nav class="sidebar">
+                <a href="dashboard.php"><span class="sidebar-icon">🏠</span>Home</a>
+                <a href="new_contact.php"><span class="sidebar-icon">➕</span>New Contact</a>
+                <a href="users.php" class="active"><span class="sidebar-icon">👥</span>Users</a>
+                <a href="logout.php"><span class="sidebar-icon">🚪</span>Logout</a>
+            </nav>
 
-            <main class="main-content">
-                <div class="contact-header">
-                    <div>
-                        <h2>
-                            <?= htmlspecialchars($contact['title']) ?>
-                            <?= htmlspecialchars($contact['first_name']) ?>
-                            <?= htmlspecialchars($contact['last_name']) ?>
-                        </h2>
+        <main class="main-content">
+            <div class="contact-header">
+                <div>
+                    <h2>
+                        <?= htmlspecialchars($contact['title']) ?>
+                        <?= htmlspecialchars($contact['first_name']) ?>
+                        <?= htmlspecialchars($contact['last_name']) ?>
+                    </h2>
 
-                        <p class="meta">
-                            Created on <?= $contact['created_at'] ?> by <?= $contact['creator_fn']. " " . $contact['creator_ln'] ?>
-                        </p>
+                    <p class="meta">
+                        Created on <?= $contact['created_at'] ?> by <?= $contact['creator_fn']. " " . $contact['creator_ln'] ?>
+                    </p>
 
-                        <p class="meta">
-                             Updated on <?= $contact['updated_at'] ?>
-                        </p>
-                    </div>
-                
-                    <div class="actions">
-                        <form method="POST">
-                            <button type="submit" name="assign_to_me">Assign to me</button>
-                        </form>
-                
-                        <form method="POST">
-                            <button type="submit" name="switch_type">
-                                Switch to <?= ($contact['type'] === 'Sales Lead') ? 'Support' : 'Sales Lead' ?>   
-                            </button>
-                        </form>
-                    </div>
+                    <p class="meta">
+                            Updated on <?= $contact['updated_at'] ?>
+                    </p>
                 </div>
+            
+                <div class="actions">
+                    <form method="POST">
+                        <button type="submit" name="assign_to_me" class="btn green">✋ Assign to me</button>
+                    </form>
+            
+                    <form method="POST">
+                        <button type="submit" name="switch_type" class="btn yellow">
+                            🔁Switch to <?= ($contact['type'] === 'Sales Lead') ? 'Support' : 'Sales Lead' ?>   
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-                <div class="card">
+            <div class="card">
+                <div class="grid">
                     <div>
                         <strong>Email</strong>
                         <p><?= htmlspecialchars($contact['email']) ?></p>
@@ -289,31 +313,31 @@ $notes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <strong>Assigned To</strong>
                         <p><?= $contact['assigned_fn']." ".$contact['assigned_ln'] ?></p>
                     </div>
-            
                 </div>
-
-                <div class="card">
-                    <h3>Notes</h3>
-
-                    <?php if (empty($notes)): ?>
-                        <p>No notes yet.</p>
-                    <?php endif; ?>
-
-                    <?php foreach ($notes as $note): ?>
-                        <div class="note">
-                            <strong><?= $note['first_name'] . " " . $note['last_name'] ?></strong><br>
-                            <?= $note['comment'] ?><br>
-                            <small><?= $note['created_at'] ?></small>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <h4>Add a note</h4>
-                    <form action="POST">
-                        <textarea name="comment" id="notes" required style="width: 100%; height: 80px;"></textarea><br /><br />
-                        <button type="submit" name="add_note">Add note</button>
-                    </form>            
-                </div>
-            </main> 
             </div>
+
+            <div class="card">
+                <h3>📝 Notes</h3>
+
+                <?php if (empty($notes)): ?>
+                    <p>No notes yet.</p>
+                <?php endif; ?>
+
+                <?php foreach ($notes as $note): ?>
+                    <div class="note">
+                        <strong><?= $note['first_name'] . " " . $note['last_name'] ?></strong><br>
+                        <?= $note['comment'] ?><br>
+                        <small><?= $note['created_at'] ?></small>
+                    </div>
+                <?php endforeach; ?>
+
+                <h4>Add a note</h4>
+                <form method="POST">
+                    <textarea name="comment" id="notes" placeholder="Enter details here" required style="width: 100%; height: 80px;"></textarea><br /><br />
+                    <button type="submit" name="add_note" class="add-note">Add note</button>
+                </form>            
+            </div>
+        </main> 
+        </div>
     </body>
 </html>
