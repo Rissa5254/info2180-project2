@@ -1,4 +1,4 @@
-<!--Create contact.php-->
+<!--Create new contact.php-->
 <?php 
 //Created by Marissa O'Meallly
 session_start();
@@ -246,7 +246,7 @@ $users = $pdo->query("SELECT id, first_name, last_name FROM users")->fetchAll();
                 <h2>New Contact</h2>
             </div>
 
-            <form action="#" method="post" class="contact-form">
+            <form action="#" method="POST" class="contact-form">
             <div class="input-group">
                 <label for="title">Title</label>
                 <select name="title" id="title" class="form-select">
